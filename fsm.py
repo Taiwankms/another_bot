@@ -51,18 +51,27 @@ async def say_start(message: types.Message, state: FSMContext):
 
 
 async def first_name(message: types.Message, state: FSMContext):
-    await message.answer("Вы ввели имя: " + message.text + "\nВводи фамилию: ")
+    await message.answer("Ну и имя у тебя, сочувствую: " + message.text + "\nВводи фамилию: ")
+    await state.update_data(first_name=message.text)
     await state.set_state(States.last_name)
 
 
 async def last_name(message: types.Message, state: FSMContext):
-    await message.answer("Вы ввели фамилию: " + message.text + "\nВводи телефон: ")
+    await message.answer("Фамилия еще лучше, как ты живешь вообще?: " + message.text + "\nВводи телефон: ")
+    await state.update_data(last_name=message.text)
     await state.set_state(States.telephone)
 
 
 async def telephone(message: types.Message, state: FSMContext):
-    await message.answer("Вы ввели телефон: " + message.text + "\nПроверь все еще раз и введи 'finish' или 'cancel': ")
+    await message.answer("Ну хоть номер норм: " + message.text)
+    await state.update_data(telephone=message.text)
     await state.set_state(States.complete)
+    data = await state.get_data()
+    await message.answer("Введенные данные: \n"
+                         f"Имя - {data['first_name']}\n"
+                         f"Фамилия - {data['last_name']}\n"
+                         f"Телефон - {data['telephone']}\n"
+                         f"Подтверди или нет, мне пох")
 
 
 async def complete(message: types.Message, state: FSMContext):
