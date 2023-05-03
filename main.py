@@ -1,8 +1,8 @@
 import logging
-from aiogram import Bot, Dispatcher, types
+from aiogram import Bot, Dispatcher, types, F
 import asyncio
 
-from aiogram.filters import Text
+from aiogram.filters import Text, Command
 from aiogram.types import BotCommand, BotCommandScopeDefault
 
 token = "6036003975:AAHLAnkY1_6Z-TXCgIVYowIm2towOAhpTvs"
@@ -38,6 +38,22 @@ async def text(message: types.Message):
     await message.answer("Никто уже давным давно не говорит " + message.text + ", ты что старпер?")
 
 
+async def hi_admin(message: types.Message):
+    await message.answer("Ну что, Админ, погнали?")
+
+
+async def picture(message: types.Message):
+    await message.answer("Ну и к чему ты мне это отправил?")
+
+
+async def say_start(message: types.Message):
+    await message.reply("Ну что, погнали?")
+
+
+async def say_help(message: types.Message):
+    await message.reply("Думаешь я смогу тебе помочь?")
+
+
 async def echo(message: types.Message):
     print("Полученное сообщение в боте: " + message.text)
     await message.answer(message.text)
@@ -51,11 +67,19 @@ async def start():
     bots = Bot(token)
     dp = Dispatcher()
 
+    dp.startup.register(send_mess_on)
+    dp.shutdown.register(send_mess_off)
+
+    dp.message.register(picture, F.content_type == 'photo')
+    dp.message.register(picture, F.content_type == 'sticker')
+    dp.message.register(picture, F.content_type == 'animation')
+    dp.message.register(hi_admin, F.from_user.id == admin_id, F.text == 'Привет')
+    dp.message.register(say_start, Command(commands=['start', 'go']))
+    dp.message.register(say_help, Command(commands='help'))
     dp.message.register(text, Text(text='Салют'))
     dp.message.register(echo)
 
-    dp.startup.register(send_mess_on)
-    dp.shutdown.register(send_mess_off)
+
     await dp.start_polling(bots)
 
 
