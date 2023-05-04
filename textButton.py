@@ -3,6 +3,7 @@ import logging
 
 from aiogram import Bot, Dispatcher, types, F
 from aiogram.filters import Command, Text
+from aiogram.fsm import state
 from aiogram.fsm.context import FSMContext
 from aiogram.fsm.state import StatesGroup, State
 from aiogram.types import BotCommand, BotCommandScopeDefault, InlineKeyboardMarkup, InlineKeyboardButton, CallbackQuery
