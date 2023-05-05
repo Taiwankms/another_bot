@@ -1,12 +1,12 @@
-import asyncio
-import logging
-
-from aiogram import Bot, Dispatcher, types, F
+from aiogram import Bot, types, F, Dispatcher
 from aiogram.filters import Command, Text
-from aiogram.fsm import state
 from aiogram.fsm.context import FSMContext
 from aiogram.fsm.state import StatesGroup, State
-from aiogram.types import BotCommand, BotCommandScopeDefault, InlineKeyboardMarkup, InlineKeyboardButton, CallbackQuery
+from aiogram.types import BotCommand, BotCommandScopeDefault, CallbackQuery
+
+from DraftBot.keyboard.inline import kb_confirm
+
+admin_id = 683197836
 
 
 class States(StatesGroup):
@@ -14,11 +14,6 @@ class States(StatesGroup):
     last_name = State()
     telephone = State()
     complete = State()
-
-
-token = "6036003975:AAHLAnkY1_6Z-TXCgIVYowIm2towOAhpTvs"
-admin_id = 683197836
-logger = logging.getLogger(__name__)
 
 
 async def commandos(bot: Bot):
@@ -72,25 +67,7 @@ async def telephone(message: types.Message, state: FSMContext):
                          f"Фамилия - {data['last_name']}\n"
                          f"Телефон - {data['telephone']}\n"
                          f"Подтверди или нет, мне пох",
-                         reply_markup=InlineKeyboardMarkup(inline_keyboard=[
-                             [
-                                 InlineKeyboardButton(
-                                     text='Подтвердить',
-                                     callback_data='confirm'
-                                 ),
-                                 InlineKeyboardButton(
-                                     text='Отмена',
-                                     callback_data='cancel'
-                                 )
-                             ],
-                             [
-                                 InlineKeyboardButton(
-                                     text='Го на сайт',
-                                     url='https://www.youtube.com/'
-                                 )
-                             ]
-                         ])
-                         )
+                         reply_markup=kb_confirm)
 
 
 async def confirm(call: CallbackQuery, state: FSMContext, bot: Bot):
@@ -110,17 +87,7 @@ async def say_help(message: types.Message):
     await message.answer("Думаешь я смогу тебе помочь?")
 
 
-async def start():
-    logging.basicConfig(
-        level=logging.INFO
-    )
-    logger.error("Error")
-    bots = Bot(token)
-    dp = Dispatcher()
-
-    dp.startup.register(send_mess_on)
-    dp.shutdown.register(send_mess_off)
-
+def register_fsm(dp: Dispatcher):
     dp.message.register(cancel, Text(text='cancel', ignore_case=True))
     dp.message.register(say_start, Command(commands=['start', 'go']))
     dp.message.register(say_help, Command(commands='help'))
@@ -129,9 +96,3 @@ async def start():
     dp.message.register(telephone, States.telephone)
     dp.callback_query.register(confirm, States.complete, F.data == 'confirm')
     dp.callback_query.register(cancel, States.complete, F.data == 'cancel')
-
-    await dp.start_polling(bots)
-
-
-if __name__ == "__main__":
-    asyncio.run(start())
