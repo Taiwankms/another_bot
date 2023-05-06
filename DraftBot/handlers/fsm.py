@@ -36,6 +36,11 @@ async def send_mess_on(bot: Bot):
     await bot.send_message(admin_id, text="Бот делает вид что работает!")
 
 
+async def send_mess_on1(bot: Bot):
+    await commandos(bot)
+    await bot.send_message(admin_id, text="Hello world!")
+
+
 async def send_mess_off(bot: Bot):
     await bot.send_message(admin_id, text="Бот отдыхает!")
 
@@ -72,8 +77,8 @@ async def telephone(message: types.Message, state: FSMContext):
 
 async def confirm(call: CallbackQuery, state: FSMContext, bot: Bot):
     await bot.edit_message_reply_markup(call.message.chat.id, call.message.message_id, reply_markup=None)
-    # await call.answer("Данные приняты ")
-    await bot.answer_callback_query(call.id, 'Ясно, понятно', show_alert=True)
+    await call.answer("Данные приняты ")
+    await bot.answer_callback_query(call.id, 'ok', show_alert=True)
     await state.clear()
 
 
@@ -87,12 +92,19 @@ async def say_help(message: types.Message):
     await message.answer("Думаешь я смогу тебе помочь?")
 
 
+async def picture(message: types.Message):
+    if message.photo:
+        await message.answer('Ну и нахер ты мне это прислал?')
+
+
 def register_fsm(dp: Dispatcher):
+    dp.callback_query.register(confirm, States.complete, F.data == 'confirm')
+    dp.callback_query.register(cancel, States.complete, F.data == 'cancel')
     dp.message.register(cancel, Text(text='cancel', ignore_case=True))
     dp.message.register(say_start, Command(commands=['start', 'go']))
     dp.message.register(say_help, Command(commands='help'))
+    # dp.message.register(picture)
     dp.message.register(first_name, States.first_name)
     dp.message.register(last_name, States.last_name)
     dp.message.register(telephone, States.telephone)
-    dp.callback_query.register(confirm, States.complete, F.data == 'confirm')
-    dp.callback_query.register(cancel, States.complete, F.data == 'cancel')
+
